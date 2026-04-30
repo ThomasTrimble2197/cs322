@@ -18,6 +18,10 @@ let nextArrivalTime = ""
 getLocationInfo();
 getArrivalInfo();
 
+document.getElementById("24th").addEventListener("click", function() {
+   document.getElementById("24pop").toggleAttribute("hidden");
+});
+
 async function getLocationInfo() {
     let response = await fetch(locationURL);
 
