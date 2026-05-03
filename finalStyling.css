@@ -1,5 +1,14 @@
-p {
-    font-size: larger;
+.popup #name {
+    font-size: 25px;
+    display: block;
+}
+
+.popup #location {
+  display: block;
+}
+
+section {
+  display: inline;
 }
 
 .popup {
@@ -8,14 +17,14 @@ p {
   color: #fff;
   text-align: center;
   border-radius: 6px;
-  padding: 8px 0;
+  padding: 8px 8px;
   position: absolute;
   z-index: 1;
   left: 50%;
   margin-left: -80px;
 }
 
-#24th {
+.station {
   position: relative;
   display: inline-block;
   cursor: pointer;
