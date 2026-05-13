@@ -273,23 +273,27 @@ function handleStationClick(stationId) {
         getLocationInfo(station1, stationNum.k1);
         getArrivalInfo(station1, stationNum.k1);
         popup1Element.toggleAttribute("hidden");
-        hideandClearTransfers();
+        hideTransfers();
         hideArrivalTime();
-
+    
+    // enable when first popup is active
     } else if (popup2Element.hasAttribute("hidden")){
         station2 = stationId;
+
         if (station1 === station2){
             station2 = "";
             hidePopUps();
+
         } else {
             getLocationInfo(station2, stationNum.k2);
             getFare(station1, station2);
             getRoute(station1, station2);
             popup2Element.toggleAttribute("hidden");
         }
+    //hide both popups 
     } else {
         hidePopUps();
-        hideandClearTransfers();
+        hideTransfers();
         hideArrivalTime();
     }
 }
@@ -357,23 +361,27 @@ async function getLocationInfo(station, stationNum) {
 }
 
 async function getArrivalInfo(station) {
-    let response = await fetch(`https://api.bart.gov/api/etd.aspx?cmd=etd&orig=${station}&key=${bartKey}&json=y`);
-    let parsed = await response.json();
-    let destinations = parsed.root.station[0].etd;
+    if (station == "oakl") {
+        getRoute("oakl", "cols");
+    } else {
+        let response = await fetch(`https://api.bart.gov/api/etd.aspx?cmd=etd&orig=${station}&key=${bartKey}&json=y`);
+        let parsed = await response.json();
+        let destinations = parsed.root.station[0].etd;
 
-    let leastIndex = destinations.length - 1;
-    for (let i = 0; i < destinations.length; i++) {
-        if (Number(destinations[i].estimate[0].minutes) < Number(destinations[leastIndex].estimate[0].minutes)) {
-            leastIndex = i;
-        } 
+        let leastIndex = destinations.length - 1;
+        for (let i = 0; i < destinations.length; i++) {
+            if (Number(destinations[i].estimate[0].minutes) < Number(destinations[leastIndex].estimate[0].minutes)) {
+                leastIndex = i;
+            } 
 
-        if (destinations[leastIndex].estimate[0].minutes == "Leaving") {
-            etdElement.textContent = "Now"
-        } else {
-            etdElement.textContent = destinations[leastIndex].estimate[0].minutes + " minutes";
+            if (destinations[leastIndex].estimate[0].minutes == "Leaving") {
+                etdElement.textContent = "Now"
+            } else {
+                etdElement.textContent = destinations[leastIndex].estimate[0].minutes + " minutes";
+            }
+
+            arrivalElement.textContent = destinations[leastIndex].destination;   
         }
-
-        arrivalElement.textContent = destinations[leastIndex].destination;   
     }
 }
 
@@ -411,7 +419,7 @@ async function getRoute(station1ID, station2ID) {
     let parsed = await response.json();
     
     let sTrip = parsed.root.schedule.request.trip;
-
+    
     if (Array.isArray(sTrip)) {
         arrivalElement.textContent = stationNames[sTrip[sTrip.length-1]["@destination"].toLowerCase()];
         etdElement.textContent = sTrip[sTrip.length-1]["@origTimeMin"];
@@ -432,8 +440,16 @@ function getTransfers(sTrip) {
     if (sTrip.leg.length > 1) {
         result = "Transfers: " + stationNames[sTrip.leg[0]["@origin"].toLowerCase()]
 
-        for (i = 0; i < sTrip.leg.length; i++) {
-            result += " > " + stationNames[sTrip.leg[i]["@destination"].toLowerCase()]
+        let incrementor = 0;
+
+        // Exception handling for Oakland Airport
+        if (sTrip.leg[0]["@origin"].toLowerCase() == "oakl") {
+            result += " > " + stationNames["cols"];
+            incrementor++;
+        } 
+
+        for (incrementor; incrementor < sTrip.leg.length; incrementor++) {
+            result += " > " + stationNames[sTrip.leg[incrementor]["@destination"].toLowerCase()]
         }
 
         transferElement.setAttribute("hidden", false);
@@ -448,10 +464,12 @@ function hidePopUps() {
     popup2Element.setAttribute("hidden", true);
 }
 
-function hideandClearTransfers() {
+// Clears and therefore hides transfers
+function hideTransfers() {
     transferElement.textContent = ""
 }
 
+// Clears and therefore hides arrival time
 function hideArrivalTime() {
     etaElement.textContent = ""
 }
