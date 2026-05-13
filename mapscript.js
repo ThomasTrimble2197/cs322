@@ -263,41 +263,6 @@ let transferElement = document.getElementById("transfers")
 const popup1Element = document.getElementById("popup1");
 const popup2Element = document.getElementById("popup2");
 
-// Station click handling (Or it might be a handler)
-function handleStationClick(stationId) {
-
-    // enable when no popup is active
-    if (popup1Element.hasAttribute("hidden")) {
-
-        station1 = stationId;
-        getLocationInfo(station1, stationNum.k1);
-        getArrivalInfo(station1, stationNum.k1);
-        popup1Element.toggleAttribute("hidden");
-        hideTransfers();
-        hideArrivalTime();
-    
-    // enable when first popup is active
-    } else if (popup2Element.hasAttribute("hidden")){
-        station2 = stationId;
-
-        if (station1 === station2){
-            station2 = "";
-            hidePopUps();
-
-        } else {
-            getLocationInfo(station2, stationNum.k2);
-            getFare(station1, station2);
-            getRoute(station1, station2);
-            popup2Element.toggleAttribute("hidden");
-        }
-    //hide both popups 
-    } else {
-        hidePopUps();
-        hideTransfers();
-        hideArrivalTime();
-    }
-}
-
 // Adding map layers and markers as the map loads
 map.on('load', () => {
     map.addSource('bart-routes', { type: 'geojson', data: bartRoutes });
@@ -334,32 +299,59 @@ map.on('load', () => {
     });
 });
 
-// Current station info (might not be needed, may remove later)
-let sName = "";
-let address = "";
-let nextArrival = "";
-let nextArrivalTime = "";
-let finalArrival = "";
-let cost = "";
+// Station click handling (Or it might be a handler)
+function handleStationClick(stationId) {
 
-// Gets the next train departure
+    // enable when no popup is active
+    if (popup1Element.hasAttribute("hidden")) {
 
+        station1 = stationId;
+        getLocationInfo(station1, stationNum.k1);
+        getArrivalInfo(station1, stationNum.k1);
+        popup1Element.toggleAttribute("hidden");
+        hideTransfers();
+        hideArrivalTime();
+    
+    // enable when first popup is active
+    } else if (popup2Element.hasAttribute("hidden")){
+        station2 = stationId;
+
+        if (station1 === station2){
+            station2 = "";
+            hidePopUps();
+
+        } else {
+            getLocationInfo(station2, stationNum.k2);
+            getFare(station1, station2);
+            getRoute(station1, station2);
+            popup2Element.toggleAttribute("hidden");
+        }
+
+    //hide both popups 
+    } else {
+        hidePopUps();
+        hideTransfers();
+        hideArrivalTime();
+    }
+}
+
+// Gets address and name
 async function getLocationInfo(station, stationNum) {
 
     let response = await fetch(`https://api.bart.gov/api/stn.aspx?cmd=stninfo&orig=${station}&key=${bartKey}&json=y`);
     let parsed = await response.json();
-    let sName = stationNames[station]
     let address = parsed.root.stations.station.city + ", " + parsed.root.stations.station.address;
     
     if (stationNum == "station1"){
-        nameElement.textContent     = sName;
+        nameElement.textContent     = stationNames[station];
         locationElement.textContent = address;
     } else {
-        nameElement2.textContent     = sName;
+        nameElement2.textContent     = stationNames[station];
         locationElement2.textContent = address;
     }
 }
 
+// Gets the next (major) train departure
 async function getArrivalInfo(station) {
     if (station == "oakl") {
         getRoute("oakl", "cols");
@@ -385,6 +377,7 @@ async function getArrivalInfo(station) {
     }
 }
 
+// Gets all fares for the trip
 async function getFare(station1ID, station2ID) {
     let response = await fetch(`https://api.bart.gov/api/sched.aspx?cmd=fare&orig=${station1ID}&dest=${station2ID}&date=today&key=${bartKey}&json=y`);
     let parsed = await response.json();
@@ -414,6 +407,7 @@ async function getFare(station1ID, station2ID) {
 
 }
 
+// Gets the specific route selected and the times associated with it
 async function getRoute(station1ID, station2ID) {
     let response = await fetch(`https://api.bart.gov/api/sched.aspx?cmd=depart&orig=${station1ID}&dest=${station2ID}&date=now&key=${bartKey}&b=0&a=1&l=0&json=y`);
     let parsed = await response.json();
@@ -434,6 +428,7 @@ async function getRoute(station1ID, station2ID) {
 
 }
 
+// Gets the transfers for the selected route
 function getTransfers(sTrip) {
     result = "";
 
