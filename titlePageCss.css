@@ -26,6 +26,27 @@ p {
     color: #ccc;
 }
 
+/* ── BART line color pills ─── */
+.lines {
+    display: flex;
+    gap: 10px;
+}
+
+.line {
+    padding: 5px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+}
+
+.line.yellow { background-color: #FFD800; color: #1a1a2e; }
+.line.red    { background-color: #E53935; }
+.line.blue   { background-color: #2196F3; }
+.line.green  { background-color: #43A047; }
+.line.orange { background-color: #FF6D00; }
+
+/* ── Button ─── */
 button {
     padding: 12px 32px;
     font-size: 16px;
@@ -34,8 +55,24 @@ button {
     border: none;
     border-radius: 6px;
     cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 button:hover {
     background-color: #e6c200;
+    transform: scale(1.05);
+}
+
+/* ── Authors ─── */
+.authors {
+    margin-top: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.authors p {
+    font-size: 13px;
+    color: #888;
 }
